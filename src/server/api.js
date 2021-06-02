@@ -269,6 +269,7 @@ app.post('/rating', (req, res) => {
 // misc stuff
 app.post('/gravel_perc', (req, res) => {
 	var geom = wkt.stringify(polyline.toGeoJSON(req.body.route))
+	//basically it finds all the bits of the segments when overlap the route, unions them, get the area (assuming its 1 meter wide), and then divides it by the area of the entire route
 	db.sequelize.query('SELECT (ST_Area(ST_Union(ST_Intersection(ST_Buffer("route"::geography, 30), ST_Buffer(ST_GeomFromText(\'' + geom + '\', 4326)::geography, 1))::geometry)) / ST_Area(ST_Buffer(ST_GeomFromText(\'' + geom + '\', 4326)::geography, 1)::geometry))*100  as gravel_percentage FROM "Segments" AS "Segment";').then(res => {
 		res.send(res[0][0])
 	})
